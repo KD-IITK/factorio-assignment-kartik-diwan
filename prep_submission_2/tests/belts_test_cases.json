@@ -1,0 +1,293 @@
+[
+  {
+    "id": "Case 1: Simple Feasible Flow",
+    "input": {
+      "sources": {
+        "s1": 1000,
+        "s2": 500
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "s2", "to": "b"},
+        {"from": "a", "to": "sink"},
+        {"from": "b", "to": "sink"}
+      ],
+      "node_caps": {}
+    },
+    "expected_output": {
+      "status": "ok",
+      "max_flow_per_min": 1500.0,
+      "flows": [
+        {"from": "s1", "to": "a", "flow": 1000.0},
+        {"from": "s2", "to": "b", "flow": 500.0},
+        {"from": "a", "to": "sink", "flow": 1000.0},
+        {"from": "b", "to": "sink", "flow": 500.0}
+      ]
+    }
+  },
+  {
+    "id": "Case 2: Feasible with Lower Bound",
+    "input": {
+      "sources": {
+        "s1": 1000
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "a", "to": "sink", "lower": 500, "upper": 1200}
+      ],
+      "node_caps": {}
+    },
+    "expected_output": {
+      "status": "ok",
+      "max_flow_per_min": 1000.0,
+      "flows": [
+        {"from": "s1", "to": "a", "flow": 1000.0},
+        {"from": "a", "to": "sink", "flow": 1000.0}
+      ]
+    }
+  },
+    {
+    "id": "Case 3: Infeasible (Lower Bound)",
+    "input": {
+      "sources": {
+        "s1": 500
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "a", "to": "sink", "lower": 800}
+      ],
+      "node_caps": {}
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "cut_reachable": ["sink"],
+      "deficit": {
+        "demand_balance": 300.0,
+        "tight_nodes": [],
+        "tight_edges": []
+      }
+    }
+  },
+  {
+    "id": "Case 4: Feasible with Node Cap",
+    "input": {
+      "sources": {
+        "s1": 1000,
+        "s2": 500
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "s2", "to": "a"},
+        {"from": "a", "to": "sink"}
+      ],
+      "node_caps": {
+        "a": 2000
+      }
+    },
+    "expected_output": {
+      "status": "ok",
+      "max_flow_per_min": 1500.0,
+      "flows": [
+        {"from": "s1", "to": "a", "flow": 1000.0},
+        {"from": "s2", "to": "a", "flow": 500.0},
+        {"from": "a", "to": "sink", "flow": 1500.0}
+      ]
+    }
+  },
+  {
+    "id": "Case 5: Infeasible (Node Cap)",
+    "input": {
+      "sources": {
+        "s1": 1000,
+        "s2": 500
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "s2", "to": "a"},
+        {"from": "a", "to": "sink"}
+      ],
+      "node_caps": {
+        "a": 1200
+      }
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "cut_reachable": ["a", "s1", "s2"],
+      "deficit": {
+        "demand_balance": 300.0,
+        "tight_nodes": ["a"],
+        "tight_edges": []
+      }
+    }
+  },
+  {
+    "id": "Case 6: Infeasible (Edge Cap)",
+    "input": {
+      "sources": {
+        "s1": 1000
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "a", "to": "sink", "upper": 800}
+      ],
+      "node_caps": {}
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "cut_reachable": ["a", "s1"],
+      "deficit": {
+        "demand_balance": 200.0,
+        "tight_nodes": [],
+        "tight_edges": [
+          {"from": "a", "to": "sink"}
+        ]
+      }
+    }
+  },
+  {
+    "id": "Case 7: Spec Sample (Feasible)",
+    "input": {
+      "sources": {
+        "s1": 900,
+        "s2": 600
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "s2", "to": "a"},
+        {"from": "a", "to": "b", "upper": 900},
+        {"from": "a", "to": "c", "upper": 600},
+        {"from": "b", "to": "sink", "upper": 900},
+        {"from": "c", "to": "sink", "upper": 600}
+      ],
+      "node_caps": {}
+    },
+    "expected_output": {
+      "status": "ok",
+      "max_flow_per_min": 1500.0,
+      "flows": [
+        {"from": "s1", "to": "a", "flow": 900.0},
+        {"from": "s2", "to": "a", "flow": 600.0},
+        {"from": "a", "to": "b", "flow": 900.0},
+        {"from": "a", "to": "c", "flow": 600.0},
+        {"from": "b", "to": "sink", "flow": 900.0},
+        {"from": "c", "to": "sink", "flow": 600.0}
+      ]
+    }
+  },
+  {
+    "id": "Case 8: Trivial (No Supply)",
+    "input": {
+      "sources": {
+        "s1": 0
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "a", "to": "sink"}
+      ],
+      "node_caps": {}
+    },
+    "expected_output": {
+      "status": "ok",
+      "max_flow_per_min": 0.0,
+      "flows": []
+    }
+  },
+  {
+    "id": "Case 9: Feasible (Multiple Paths, Node Caps)",
+    "input": {
+      "sources": {
+        "s1": 500,
+        "s2": 500
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "s2", "to": "a"},
+        {"from": "s1", "to": "b"},
+        {"from": "b", "to": "c"},
+        {"from": "a", "to": "c"},
+        {"from": "c", "to": "sink"}
+      ],
+      "node_caps": {
+        "a": 800,
+        "b": 300,
+        "c": 1100
+      }
+    },
+    "expected_output": {
+      "status": "ok",
+      "max_flow_per_min": 1000.0,
+      "flows": [
+        {"from": "s1", "to": "a", "flow": 300.0},
+        {"from": "s1", "to": "b", "flow": 200.0},
+        {"from": "s2", "to": "a", "flow": 500.0},
+        {"from": "b", "to": "c", "flow": 200.0},
+        {"from": "a", "to": "c", "flow": 800.0},
+        {"from": "c", "to": "sink", "flow": 1000.0}
+      ]
+    }
+  },
+  {
+    "id": "Case 10: Infeasible (Split Source in Cut)",
+    "input": {
+      "sources": {
+        "s1": 1000
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a", "upper": 400},
+        {"from": "s1", "to": "b", "upper": 400},
+        {"from": "a", "to": "sink"},
+        {"from": "b", "to": "sink"}
+      ],
+      "node_caps": {}
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "cut_reachable": ["s1"],
+      "deficit": {
+        "demand_balance": 200.0,
+        "tight_nodes": [],
+        "tight_edges": [
+          {"from": "s1", "to": "a"},
+          {"from": "s1", "to": "b"}
+        ]
+      }
+    }
+  },
+  {
+    "id": "Case 11: Infeasible (Combined Node and Lo-Bound)",
+    "input": {
+      "sources": {
+        "s1": 1000
+      },
+      "sink": "sink",
+      "edges": [
+        {"from": "s1", "to": "a"},
+        {"from": "a", "to": "b"},
+        {"from": "b", "to": "sink", "lower": 900}
+      ],
+      "node_caps": {
+        "a": 800
+      }
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "cut_reachable": ["a", "s1"],
+      "deficit": {
+        "demand_balance": 200.0,
+        "tight_nodes": ["a"],
+        "tight_edges": []
+      }
+    }
+  }
+]
+

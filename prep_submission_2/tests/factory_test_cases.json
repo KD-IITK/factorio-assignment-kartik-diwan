@@ -1,0 +1,436 @@
+[
+  {
+    "id": "Case 1: Original Sample (with Prod)",
+    "input": {
+      "machines": {
+        "assembler_1": {"crafts_per_min": 30},
+        "chemical": {"crafts_per_min": 60}
+      },
+      "recipes": {
+        "iron_plate": {
+          "machine": "chemical",
+          "time_s": 3.2,
+          "in": {"iron_ore": 1},
+          "out": {"iron_plate": 1}
+        },
+        "copper_plate": {
+          "machine": "chemical",
+          "time_s": 3.2,
+          "in": {"copper_ore": 1},
+          "out": {"copper_plate": 1}
+        },
+        "green_circuit": {
+          "machine": "assembler_1",
+          "time_s": 0.5,
+          "in": {"iron_plate": 1, "copper_plate": 3},
+          "out": {"green_circuit": 1}
+        }
+      },
+      "modules": {
+        "assembler_1": {"prod": 0.1, "speed": 0.15},
+        "chemical": {"prod": 0.2, "speed": 0.1}
+      },
+      "limits": {
+        "raw_supply_per_min": {"iron_ore": 5000, "copper_ore": 5000},
+        "max_machines": {"assembler_1": 300, "chemical": 300}
+      },
+      "target": {"item": "green_circuit", "rate_per_min": 1800}
+    },
+    "expected_output": {
+      "status": "ok",
+      "per_recipe_crafts_per_min": {
+        "copper_plate": 4090.909090909091,
+        "green_circuit": 1636.3636363636363,
+        "iron_plate": 1363.6363636363635
+      },
+      "per_machine_counts": {
+        "assembler_1": 0.39525691699604737,
+        "chemical": 4.40771349862259
+      },
+      "raw_consumption_per_min": {
+        "copper_ore": 4090.909090909091,
+        "iron_ore": 1363.6363636363635
+      }
+    }
+  },
+  {
+    "id": "Case 2: Infeasible (Machine Cap)",
+    "input": {
+      "machines": {
+        "assembler_1": {"crafts_per_min": 60},
+        "furnace_1": {"crafts_per_min": 120}
+      },
+      "recipes": {
+        "iron_plate": {
+          "machine": "furnace_1",
+          "time_s": 3.2,
+          "in": {"iron_ore": 1},
+          "out": {"iron_plate": 1}
+        },
+        "iron_gear": {
+          "machine": "assembler_1",
+          "time_s": 0.5,
+          "in": {"iron_plate": 2},
+          "out": {"iron_gear": 1}
+        },
+        "red_science": {
+          "machine": "assembler_1",
+          "time_s": 5,
+          "in": {"iron_gear": 1, "copper_plate": 1},
+          "out": {"red_science": 1}
+        }
+      },
+      "modules": {},
+      "limits": {
+        "raw_supply_per_min": {"iron_ore": 1000, "copper_plate": 1000},
+        "max_machines": {"assembler_1": 0.05, "furnace_1": 100}
+      },
+      "target": {"item": "red_science", "rate_per_min": 60}
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "max_feasible_target_per_min": 32.72727272727273,
+      "bottleneck_hint": [
+        "assembler_1 cap"
+      ]
+    }
+  },
+  {
+    "id": "Case 3: Infeasible (Raw Supply)",
+    "input": {
+      "machines": {
+        "assembler_1": {"crafts_per_min": 60},
+        "furnace_1": {"crafts_per_min": 120}
+      },
+      "recipes": {
+        "iron_plate": {
+          "machine": "furnace_1",
+          "time_s": 3.2,
+          "in": {"iron_ore": 1},
+          "out": {"iron_plate": 1}
+        },
+        "iron_gear": {
+          "machine": "assembler_1",
+          "time_s": 0.5,
+          "in": {"iron_plate": 2},
+          "out": {"iron_gear": 1}
+        },
+        "red_science": {
+          "machine": "assembler_1",
+          "time_s": 5,
+          "in": {"iron_gear": 1, "copper_plate": 1},
+          "out": {"red_science": 1}
+        }
+      },
+      "modules": {},
+      "limits": {
+        "raw_supply_per_min": {"iron_ore": 100, "copper_plate": 1000},
+        "max_machines": {"assembler_1": 100, "furnace_1": 100}
+      },
+      "target": {"item": "red_science", "rate_per_min": 60}
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "max_feasible_target_per_min": 50.0,
+      "bottleneck_hint": [
+        "iron_ore supply"
+      ]
+    }
+  },
+  {
+    "id": "Case 4: Alternative Recipes (Minimization)",
+    "input": {
+      "machines": {
+        "furnace_1": {"crafts_per_min": 120},
+        "furnace_2": {"crafts_per_min": 240}
+      },
+      "recipes": {
+        "iron_plate_slow": {
+          "machine": "furnace_1",
+          "time_s": 3.2,
+          "in": {"iron_ore": 1},
+          "out": {"iron_plate": 1}
+        },
+        "iron_plate_fast": {
+          "machine": "furnace_2",
+          "time_s": 3.2,
+          "in": {"iron_ore": 1},
+          "out": {"iron_plate": 1}
+        }
+      },
+      "modules": {},
+      "limits": {
+        "raw_supply_per_min": {"iron_ore": 5000},
+        "max_machines": {"furnace_1": 100, "furnace_2": 0.5}
+      },
+      "target": {"item": "iron_plate", "rate_per_min": 3000}
+    },
+    "expected_output": {
+      "status": "ok",
+      "per_recipe_crafts_per_min": {
+        "iron_plate_fast": 2250.0,
+        "iron_plate_slow": 750.0
+      },
+      "per_machine_counts": {
+        "furnace_1": 0.3333333333333333,
+        "furnace_2": 0.5
+      },
+      "raw_consumption_per_min": {
+        "iron_ore": 3000.0
+      }
+    }
+  },
+  {
+    "id": "Case 5: Cycle & Byproduct (FIXED)",
+    "input": {
+      "machines": {
+        "refinery": {"crafts_per_min": 60},
+        "chem_plant": {"crafts_per_min": 60}
+      },
+      "recipes": {
+        "adv_oil": {
+          "machine": "refinery",
+          "time_s": 5,
+          "in": {"crude_oil": 100},
+          "out": {"heavy_oil": 25, "light_oil": 45, "petroleum_gas": 55}
+        },
+        "heavy_crack": {
+          "machine": "chem_plant",
+          "time_s": 2,
+          "in": {"heavy_oil": 30},
+          "out": {"light_oil": 40}
+        },
+        "light_crack": {
+          "machine": "chem_plant",
+          "time_s": 2,
+          "in": {"light_oil": 30},
+          "out": {"petroleum_gas": 20}
+        }
+      },
+      "modules": {},
+      "limits": {
+        "raw_supply_per_min": {"crude_oil": 10000},
+        "max_machines": {"refinery": 10, "chem_plant": 10}
+      },
+      "target": {"item": "petroleum_gas", "rate_per_min": 1000}
+    },
+    "expected_output": {
+      "status": "ok",
+      "per_recipe_crafts_per_min": {
+        "adv_oil": 9.326424870466321,
+        "heavy_crack": 7.772020725388601,
+        "light_crack": 24.352331606217616
+      },
+      "per_machine_counts": {
+        "chem_plant": 0.0178468624064479,
+        "refinery": 0.012953367875647668
+      },
+      "raw_consumption_per_min": {
+        "crude_oil": 932.6424870466321
+      }
+    }
+  },
+  {
+    "id": "Case 6: Fundamentally Infeasible (0 rate)",
+    "input": {
+      "machines": {
+        "assembler_1": {"crafts_per_min": 30}
+      },
+      "recipes": {
+         "iron_plate": {
+          "machine": "assembler_1",
+          "time_s": 3.2,
+          "in": {"iron_ore": 1},
+          "out": {"iron_plate": 1}
+        }
+      },
+      "modules": {},
+      "limits": {
+         "raw_supply_per_min": {"iron_ore": 5000},
+         "max_machines": {"assembler_1": 300}
+      },
+      "target": {"item": "unobtanium", "rate_per_min": 100}
+    },
+    "expected_output": {
+      "status": "infeasible",
+      "max_feasible_target_per_min": 0.0,
+      "bottleneck_hint": [
+        "Problem is fundamentally infeasible"
+      ]
+    }
+  },
+    {
+      "id": "Factory 1 - Simple linear chain, raw limited",
+      "input": {
+        "machines": {"chem": {"crafts_per_min": 60}, "asm1": {"crafts_per_min": 30}},
+        "recipes": {
+          "iron_plate": {"machine": "chem", "time_s": 3.0, "in": {"iron_ore": 1}, "out": {"iron_plate": 1}},
+          "gear": {"machine": "asm1", "time_s": 2.0, "in": {"iron_plate": 2}, "out": {"gear": 1}}
+        },
+        "modules": {"chem": {"prod": 0.0, "speed": 0.0}, "asm1": {"prod": 0.0, "speed": 0.0}},
+        "limits": {"raw_supply_per_min": {"iron_ore": 100}, "max_machines": {"chem": 5, "asm1": 10}},
+        "target": {"item": "gear", "rate_per_min": 60}
+      },
+      "expected_output": {
+        "status": "infeasible",
+        "max_feasible_target_per_min": 50.0,
+        "bottleneck_hint": ["iron_ore supply"]
+      }
+    },
+    {
+      "id": "Factory 2 - Simple feasible",
+      "input": {
+        "machines": {"chem": {"crafts_per_min": 60}, "asm1": {"crafts_per_min": 30}},
+        "recipes": {
+          "iron_plate": {"machine": "chem", "time_s": 3.0, "in": {"iron_ore": 1}, "out": {"iron_plate": 1}},
+          "gear": {"machine": "asm1", "time_s": 2.0, "in": {"iron_plate": 2}, "out": {"gear": 1}}
+        },
+        "modules": {"chem": {"prod": 0.0, "speed": 0.0}, "asm1": {"prod": 0.0, "speed": 0.0}},
+        "limits": {"raw_supply_per_min": {"iron_ore": 1000}, "max_machines": {"chem": 10, "asm1": 10}},
+        "target": {"item": "gear", "rate_per_min": 60}
+      },
+      "expected_output": {
+        "status": "ok",
+        "per_recipe_crafts_per_min": {"iron_plate": 120.0, "gear": 60.0},
+        "per_machine_counts": {"chem": 0.1, "asm1": 0.06666666666666667},
+        "raw_consumption_per_min": {"iron_ore": 120.0}
+      }
+    },
+    {
+      "id": "Factory 3 - Productivity modules increase outputs",
+      "input": {
+        "machines": {"chem": {"crafts_per_min": 60}, "asm1": {"crafts_per_min": 30}},
+        "recipes": {
+          "iron_plate": {"machine": "chem", "time_s": 3.0, "in": {"iron_ore": 1}, "out": {"iron_plate": 1}},
+          "gear": {"machine": "asm1", "time_s": 2.0, "in": {"iron_plate": 2}, "out": {"gear": 1}}
+        },
+        "modules": {"chem": {"prod": 0.1, "speed": 0.0}, "asm1": {"prod": 0.0, "speed": 0.0}},
+        "limits": {"raw_supply_per_min": {"iron_ore": 130}, "max_machines": {"chem": 2, "asm1": 5}},
+        "target": {"item": "gear", "rate_per_min": 60}
+      },
+      "expected_output": {
+        "status": "ok",
+        "per_recipe_crafts_per_min": {"iron_plate": 109.0909090909091, "gear": 60.0},
+        "per_machine_counts": {"chem": 0.09090909090909091, "asm1": 0.06666666666666667},
+        "raw_consumption_per_min": {"iron_ore": 109.0909090909091}
+      }
+    },
+    {
+      "id": "Factory 4 - Speed modules reduce machine count",
+      "input": {
+        "machines": {"chem": {"crafts_per_min": 60}, "asm2": {"crafts_per_min": 45}},
+        "recipes": {
+          "A": {"machine": "chem", "time_s": 4.0, "in": {"oreA": 1}, "out": {"A": 1}},
+          "B": {"machine": "asm2", "time_s": 1.0, "in": {"A": 3}, "out": {"B": 2}}
+        },
+        "modules": {"chem": {"prod": 0.0, "speed": 0.5}, "asm2": {"prod": 0.0, "speed": 0.0}},
+        "limits": {"raw_supply_per_min": {"oreA": 1000}, "max_machines": {"chem": 1, "asm2": 10}},
+        "target": {"item": "B", "rate_per_min": 600}
+      },
+      "expected_output": {
+        "status": "ok",
+        "per_recipe_crafts_per_min": {"A": 900.0, "B": 300.0},
+        "per_machine_counts": {"chem": 0.6666666666666666, "asm2": 0.1111111111111111},
+        "raw_consumption_per_min": {"oreA": 900.0}
+      }
+    },
+    {
+      "id": "Factory 5 - Multiple recipes produce same intermediate",
+      "input": {
+        "machines": {"furnace": {"crafts_per_min": 120}, "smelter": {"crafts_per_min": 80}, "assembler": {"crafts_per_min": 30}},
+        "recipes": {
+          "iron_plate_furnace": {"machine": "furnace", "time_s": 1.0, "in": {"iron_ore": 1}, "out": {"iron_plate": 1}},
+          "iron_plate_smelter": {"machine": "smelter", "time_s": 0.5, "in": {"iron_ore": 1}, "out": {"iron_plate": 1}},
+          "widget": {"machine": "assembler", "time_s": 2.0, "in": {"iron_plate": 4}, "out": {"widget": 1}}
+        },
+        "modules": {},
+        "limits": {"raw_supply_per_min": {"iron_ore": 1000}, "max_machines": {"furnace": 2, "smelter": 2, "assembler": 2}},
+        "target": {"item": "widget", "rate_per_min": 100}
+      },
+      "expected_output": {
+        "status": "ok",
+        "per_recipe_crafts_per_min": {"iron_plate_smelter": 400.0, "iron_plate_furnace": 0.0, "widget": 100.0},
+        "per_machine_counts": {"smelter": 0.041666666666666664, "furnace": 0.0, "assembler": 0.1111111111111111},
+        "raw_consumption_per_min": {"iron_ore": 400.0}
+      }
+    },
+    {
+      "id": "Factory 6 - Cycle with byproduct",
+      "input": {
+        "machines": {"chem": {"crafts_per_min": 60}, "ref": {"crafts_per_min": 40}},
+        "recipes": {
+          "X_to_Y": {"machine": "chem", "time_s": 2.0, "in": {"X": 1}, "out": {"Y": 2}},
+          "Y_to_X": {"machine": "ref", "time_s": 3.0, "in": {"Y": 1}, "out": {"X": 1, "Z": 0.5}},
+          "final": {"machine": "ref", "time_s": 1.0, "in": {"Y": 3}, "out": {"final": 1}}
+        },
+        "modules": {},
+        "limits": {"raw_supply_per_min": {"X": 500}, "max_machines": {"chem": 50, "ref": 50}},
+        "target": {"item": "final", "rate_per_min": 50}
+      },
+      "expected_output": {
+        "status": "ok",
+        "per_recipe_crafts_per_min": {"X_to_Y": 75.0, "Y_to_X": 0.0, "final": 50.0},
+        "per_machine_counts": {"chem": 0.041666666666666664, "ref": 0.020833333333333332},
+        "raw_consumption_per_min": {"X": 75.0}
+      }
+  },
+  {
+    "id": "Factory 7 - Tight machine cap forces alternative routing",
+    "input": {
+        "machines": {"fast": {"crafts_per_min": 200}, "slow": {"crafts_per_min": 40}},
+        "recipes": {
+          "prod_fast": {"machine": "fast", "time_s": 2.0, "in": {"ore": 1}, "out": {"P": 1}},
+          "prod_slow": {"machine": "slow", "time_s": 1.0, "in": {"ore": 1}, "out": {"P": 1}},
+          "final": {"machine": "slow", "time_s": 1.0, "in": {"P": 5}, "out": {"final": 1}}
+        },
+        "modules": {},
+        "limits": {"raw_supply_per_min": {"ore": 1000}, "max_machines": {"fast": 0, "slow": 20}},
+        "target": {"item": "final", "rate_per_min": 10}
+      },
+      "expected_output": {
+      "status": "ok",
+      "per_recipe_crafts_per_min": {"prod_fast": 0.0, "prod_slow": 50.0, "final": 10.0},
+      "per_machine_counts": {"fast": 0.0, "slow": 0.025},
+      "raw_consumption_per_min": {"ore": 50.0}
+    }
+  },
+  {
+      "id": "Factory 8 - Tight raw supply exact cap",
+      "input": {
+        "machines": {"m1": {"crafts_per_min": 100}},
+        "recipes": {
+          "r1": {"machine": "m1", "time_s": 2.0, "in": {"ore1": 3}, "out": {"A": 1}},
+          "r2": {"machine": "m1", "time_s": 1.0, "in": {"A": 2}, "out": {"target": 1}}
+        },
+        "modules": {},
+        "limits": {"raw_supply_per_min": {"ore1": 300}, "max_machines": {"m1": 10}},
+        "target": {"item": "target", "rate_per_min": 50}
+      },
+      "expected_output": {
+        "status": "ok",
+        "per_recipe_crafts_per_min": {"r1": 100.0, "r2": 50.0},
+        "per_machine_counts": {"m1": 0.041666666666666664},
+        "raw_consumption_per_min": {"ore1": 300.0}
+      }
+    },
+    {
+      "id": "Factory 9 - Multiple raw inputs and machine-cap check",
+      "input": {
+        "machines": {"mA": {"crafts_per_min": 50}, "mB": {"crafts_per_min": 40}},
+        "recipes": {
+          "rA": {"machine": "mA", "time_s": 2.0, "in": {"ore1": 2}, "out": {"A": 1}},
+          "rB": {"machine": "mB", "time_s": 1.0, "in": {"ore2": 3, "A": 1}, "out": {"product": 1}}
+        },
+        "modules": {},
+        "limits": {"raw_supply_per_min": {"ore1": 200, "ore2": 100}, "max_machines": {"mA": 2, "mB": 1}},
+        "target": {"item": "product", "rate_per_min": 20}
+      },
+      "expected_output": {
+        "status": "ok",
+        "per_recipe_crafts_per_min": {"rA": 20.0, "rB": 20.0},
+        "per_machine_counts": {"mA": 0.013333333333333334, "mB": 0.008333333333333333},
+        "raw_consumption_per_min": {"ore1": 40.0, "ore2": 60.0}
+      }
+    }
+]
+

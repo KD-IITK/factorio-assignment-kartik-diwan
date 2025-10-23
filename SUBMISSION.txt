@@ -1,0 +1,9 @@
+Name: Kartik Diwan
+Personal Email: kartikdiwan99@gmail.com
+IITK Email: kartikd22@iitk.ac.in
+OS: Windows 11 Home Single Language
+CPU: 12th Gen Intel(R) Core(TM) i5-12450H (2.00 GHz)
+RAM: 16.0 GB (15.6 GB usable)
+Python 3.11.9
+scipy.optimize.linprog (with the method='highs')
+networkx.maximum_flow
